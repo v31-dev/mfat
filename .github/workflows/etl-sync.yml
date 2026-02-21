@@ -1,0 +1,53 @@
+name: MFapi Sync
+
+on:
+  schedule:
+    - cron: '15 0 * * *'  # 12:15 AM UTC = 5:45 AM IST (after 6 AM update)
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: mfat
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mfat
+        run: |
+          cd backend
+          npx prisma migrate deploy
+
+      - name: Sync MFapi data
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mfat
+        run: |
+          cd backend
+          npm run sync
+
+      - name: Log completion
+        run: echo "✅ ETL sync completed at $(date)"
