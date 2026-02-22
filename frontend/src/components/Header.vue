@@ -10,7 +10,7 @@ const mode = useColorMode();
   <header
     class="border-b border-border sticky top-0 z-40 bg-background/95 backdrop-blur"
   >
-    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-2 py-2 flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold">MFAT</h1>
         <p class="text-sm text-muted-foreground">Mutual Fund Analysis Tool</p>

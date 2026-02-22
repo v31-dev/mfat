@@ -110,10 +110,10 @@ watch(calendarValue, (val) => {
 
     <!-- Main Content -->
     <main
-      class="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6"
+      class="max-w-7xl mx-auto sm:px-2 sm:py-2 sm:py-4"
     >
       <!-- Chart Section -->
-      <Card class="py-4 sm:py-6">
+      <Card class="py-2 py-4 sm:py-6">
         <CardHeader class="px-4 sm:px-6 flex items-center justify-between">
           <CardTitle class="truncate">Fund Performance</CardTitle>
           <CardAction
@@ -139,7 +139,7 @@ watch(calendarValue, (val) => {
             </Popover>
           </CardAction>
         </CardHeader>
-        <CardContent class="px-4 sm:px-6 py-2 sm:py-0">
+        <CardContent class="px-2 sm:px-4 py-2 sm:py-0">
           <ChartViewer
             :data="dataStore.filteredFundData"
             :funds="dataStore.selectedFunds"
@@ -149,7 +149,7 @@ watch(calendarValue, (val) => {
         </CardContent>
         <CardContent
           v-if="dataStore.selectedFunds.length > 0"
-          class="flex w-full sm:w-auto justify-between sm:justify-end"
+          class="flex w-full px-2 sm:px-4 sm:w-auto justify-between sm:justify-end"
         >
           <ButtonGroup class="w-full sm:w-auto flex">
             <Button
@@ -172,7 +172,7 @@ watch(calendarValue, (val) => {
             </Button>
           </ButtonGroup>
         </CardContent>
-        <CardContent class="px-4 sm:px-6 py-2 sm:py-0">
+        <CardContent class="px-2 sm:px-4 py-0">
           <DataTable />
         </CardContent>
       </Card>
