@@ -229,7 +229,7 @@ const onSelectFund = (fund: Fund) => {
         :key="fund.schemeCode"
         class="px-2"
       >
-        <CardHeader class="px-3 py-2">
+        <CardHeader class="px-2 py-0">
           <CardTitle class="min-w-0">
             <div class="flex items-center gap-2">
               <div
@@ -252,8 +252,8 @@ const onSelectFund = (fund: Fund) => {
             </Button>
           </CardAction>
         </CardHeader>
-        <CardContent class="px-2 py-2">
-          <div class="mt-2 grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
+        <CardContent class="px-2">
+          <div class="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
             <div class="flex justify-between">
               <span class="text-muted-foreground">NAV ₹</span>
               <span>{{ getLastNav(fund.schemeCode) }}</span>
