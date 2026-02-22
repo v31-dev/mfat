@@ -73,7 +73,7 @@ const getReturn = (schemeCode: number, period: Period): number | string => {
 
   return parseFloat(
     (((endNavEntry.nav - startNavEntry.nav) / startNavEntry.nav) * 100).toFixed(
-      2,
+      0,
     ),
   );
 };
