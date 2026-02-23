@@ -31,6 +31,7 @@ const changePeriodCalendar = ref<any>({
   end: null,
   clicked: null as "start" | "end" | null,
 });
+
 // Parse CSV schemeCode from router
 const parseSchemeCodesFromRoute = (max = dataStore.MAX_FUNDS): number[] => {
   try {

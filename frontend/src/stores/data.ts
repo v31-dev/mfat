@@ -53,8 +53,8 @@ export const useDataStore = defineStore("data", () => {
       }
     });
 
-    const _allowedPeriod = new Period(startDate, endDate);
     // If the currently selected period is outside the allowed range, reset it to the allowed range
+    const _allowedPeriod = new Period(startDate, endDate);
     if (selectedPeriod.value.startsBefore(_allowedPeriod)) {
       selectedPeriod.value = _allowedPeriod;
     }
