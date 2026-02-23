@@ -46,10 +46,25 @@ const _CHART_TYPES = [
     label: "Rolling Returns (30D)",
   },
   {
+    days: 90,
+    value: "rolling-90",
+    label: "Rolling Returns (3M)",
+  },
+  {
+    days: 180,
+    value: "rolling-180",
+    label: "Rolling Returns (6M)",
+  },
+  {
     days: 365,
     value: "rolling-365",
     label: "Rolling Returns (1Y)",
   },
+  {
+    days: 1095,
+    value: "rolling-1095",
+    label: "Rolling Returns (3Y)",
+  }
 ];
 
 // Parse CSV schemeCode from router
