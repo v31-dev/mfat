@@ -1,4 +1,5 @@
 import type { CalendarDate } from "@internationalized/date";
+import { dateToString, calendarDateToDate } from "@/lib/utils";
 
 export interface Fund {
   schemeCode: number;
@@ -28,10 +29,7 @@ export class Period {
   }
 
   static getFromCalendarDate(start: CalendarDate, end: CalendarDate): Period {
-    return new Period(
-      new Date(start.year, start.month - 1, start.day),
-      new Date(end.year, end.month - 1, end.day),
-    );
+    return new Period(calendarDateToDate(start), calendarDateToDate(end));
   }
 
   static getFromSymbol(symbol: string): Period {
@@ -69,23 +67,7 @@ export class Period {
 
   // Format like 1 Jan 2020 - 31 Dec 2020
   toString(): string {
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    const fmt = (d: Date) =>
-      `${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
-    return `${fmt(this.start)} - ${fmt(this.end)}`;
+    return `${dateToString(this.start)} - ${dateToString(this.end)}`;
   }
 
   equals(other: Period): boolean {
