@@ -20,6 +20,7 @@ import { fromDate } from "@internationalized/date";
 import ButtonGroup from "@/components/ui/button-group/ButtonGroup.vue";
 import { dateToString, calendarDateToDate, changeDateByDays } from "@/lib/utils";
 import PopoverAnchor from "@/components/ui/popover/PopoverAnchor.vue";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const route = useRoute();
 const router = useRouter();
@@ -31,6 +32,25 @@ const changePeriodCalendar = ref<any>({
   end: null,
   clicked: null as "start" | "end" | null,
 });
+const chartType = ref<string>("absolute");
+
+const _CHART_TYPES = [
+  {
+    days: undefined,
+    value: "absolute",
+    label: "Absolute Returns",
+  },
+  {
+    days: 30,
+    value: "rolling-30",
+    label: "Rolling Returns (30D)",
+  },
+  {
+    days: 365,
+    value: "rolling-365",
+    label: "Rolling Returns (1Y)",
+  },
+];
 
 // Parse CSV schemeCode from router
 const parseSchemeCodesFromRoute = (max = dataStore.MAX_FUNDS): number[] => {
@@ -140,7 +160,22 @@ watch(changePeriodPopoverOpen, (val) => {
       <!-- Chart Section -->
       <Card class="py-2 py-4 sm:py-6">
         <CardHeader class="px-4 sm:px-6 flex items-center justify-between">
-          <CardTitle class="truncate">Fund Performance</CardTitle>
+          <CardTitle class="truncate">
+            <Select v-model="chartType">
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <template v-for="{ value, label, days } in _CHART_TYPES" :key="value">
+                  <SelectItem
+                    v-if="value === 'absolute' || (value.startsWith('rolling') && days !== undefined && !isNaN(days) && days < dataStore.numberDataPoints)"
+                    :value="value">
+                    {{ label }}
+                  </SelectItem>
+                </template>
+              </SelectContent>
+            </Select>
+          </CardTitle>
           <CardAction v-if="dataStore.selectedFunds.length > 0" class="flex items-center space-x-2 ml-4 flex-shrink-0">
             <Popover v-model:open="changePeriodPopoverOpen">
               <PopoverAnchor>
@@ -166,7 +201,7 @@ watch(changePeriodPopoverOpen, (val) => {
         </CardHeader>
         <CardContent class="px-2 sm:px-4 py-2 sm:py-0">
           <ChartViewer :data="dataStore.filteredFundData" :funds="dataStore.selectedFunds"
-            :period="dataStore.selectedPeriod" :loading="dataStore.isLoading" />
+            :period="dataStore.selectedPeriod" :type="chartType" :loading="dataStore.isLoading" />
         </CardContent>
         <CardContent v-if="dataStore.selectedFunds.length > 0"
           class="flex w-full px-2 sm:px-4 sm:w-auto justify-between sm:justify-end">

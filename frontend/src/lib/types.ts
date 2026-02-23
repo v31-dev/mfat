@@ -77,6 +77,11 @@ export class Period {
   startsBefore(other: Period): boolean {
     return this.start < other.start;
   }
+
+  // Reutrn duration in days
+  duration(): number {
+    return (this.end.getTime() - this.start.getTime()) / (1000 * 60 * 60 * 24);
+  }
 }
 
 export class Colors {

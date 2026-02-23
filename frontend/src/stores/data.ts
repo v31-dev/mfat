@@ -64,6 +64,7 @@ export const useDataStore = defineStore("data", () => {
 
   // Funds can have different starting & end dates
   // So we filter the date before sending it to the chart and table components
+  const numberDataPoints = ref(0);
   const filteredFundData = computed<Map<number, FundData>>(() => {
     const filtered = new Map<number, FundData>();
 
@@ -84,6 +85,7 @@ export const useDataStore = defineStore("data", () => {
       }
     }
 
+    numberDataPoints.value = Math.min(...Array.from(filtered.values()).map(({ nav }) => nav.length));
     return filtered;
   });
 
@@ -134,6 +136,7 @@ export const useDataStore = defineStore("data", () => {
     selectedPeriod,
     allowedPeriod,
     isLoading,
+    numberDataPoints,
     // Actions
     addFund,
     removeFund,
