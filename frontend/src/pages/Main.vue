@@ -32,7 +32,6 @@ const changePeriodCalendar = ref<any>({
   end: null,
   clicked: null as "start" | "end" | null,
 });
-const chartType = ref<string>("absolute");
 
 const _CHART_TYPES = [
   {
@@ -176,7 +175,7 @@ watch(changePeriodPopoverOpen, (val) => {
       <Card class="py-2 py-4 sm:py-6">
         <CardHeader class="px-4 sm:px-6 flex items-center justify-between">
           <CardTitle class="truncate">
-            <Select v-model="chartType">
+            <Select v-model="dataStore.chartType">
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -216,7 +215,7 @@ watch(changePeriodPopoverOpen, (val) => {
         </CardHeader>
         <CardContent class="px-2 sm:px-4 py-2 sm:py-0">
           <ChartViewer :data="dataStore.filteredFundData" :funds="dataStore.selectedFunds"
-            :period="dataStore.selectedPeriod" :type="chartType" :loading="dataStore.isLoading" />
+            :period="dataStore.selectedPeriod" :percentage="dataStore.chartType.startsWith('rolling-')" :loading="dataStore.isLoading" />
         </CardContent>
         <CardContent v-if="dataStore.selectedFunds.length > 0"
           class="flex w-full px-2 sm:px-4 sm:w-auto justify-between sm:justify-end">

@@ -1,8 +1,44 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import type { Fund, FundData } from "@/lib/types";
-import { Period } from "@/lib/types";
+import { Period, type NavData } from "@/lib/types";
 import { getNavHistory, getFundDetails } from "@/lib/api";
+
+// Calculates rolling returns for an array of numbers, omitting initial nulls.
+function getRollingReturns(data: NavData[], period: number): NavData[] {
+  // If the period is invalid or larger than our data, return an empty array
+  if (period <= 0 || period >= data.length) {
+    return [];
+  }
+
+  const returns: NavData[] = [];
+
+  // Start the loop exactly at the 'period' index to skip the unavailable lookback window
+  for (let i = period; i < data.length; i++) {
+    const currentValue = data[i]?.nav;
+    const pastValue = data[i - period]?.nav;
+
+    // Prevent division by zero, undefined currentValue, or undefined pastValue. Adjust this fallback (e.g., 0) based on your needs.
+    if (
+      pastValue === 0 ||
+      currentValue === undefined ||
+      pastValue === undefined
+    ) {
+      returns.push({ date: data[i]!.date, nav: 0 });
+      console.error(
+        `Invalid data at index ${i}: currentValue=${currentValue}, pastValue=${pastValue}. Returning 0 for this point.`,
+      );
+
+    } else {
+      returns.push({
+        date: data[i]!.date,
+        nav: 100 * (currentValue - pastValue) / pastValue,
+      });
+    }
+  }
+
+  return returns;
+}
 
 export const useDataStore = defineStore("data", () => {
   // Constants
@@ -10,6 +46,7 @@ export const useDataStore = defineStore("data", () => {
 
   // State
   const isLoading = ref(false);
+  const chartType = ref<string>("absolute");
 
   // Funds added by user and their NAV data
   const fundData = ref<Map<number, FundData>>(new Map());
@@ -63,10 +100,26 @@ export const useDataStore = defineStore("data", () => {
   });
 
   // Funds can have different starting & end dates
-  // So we filter the date before sending it to the chart and table components
+  // So we filter the date before sending it to the chart components
   const numberDataPoints = ref(0);
   const filteredFundData = computed<Map<number, FundData>>(() => {
     const filtered = new Map<number, FundData>();
+
+    // If chart type is rolling, determine the rolling period in days
+    let rollingPeriod = 1;
+    // rolling period = 1 is normal absolute performance, no rolling average applied
+    try {
+      if (chartType.value.startsWith("rolling-")) {
+        const days = parseInt(chartType.value.split("-")[1] ?? "");
+        rollingPeriod = isNaN(days) ? 1 : days;
+      }
+    } catch (e) {
+      console.error(
+        "Invalid chart type format for rolling period:",
+        chartType.value,
+      );
+      chartType.value = "absolute"; // Reset to default if format is invalid
+    }
 
     // Filter the data for each fund based on the determined date range
     for (const [schemeCode, { nav: fundNavs }] of fundData.value) {
@@ -78,14 +131,21 @@ export const useDataStore = defineStore("data", () => {
       });
 
       if (filteredArray.length > 0) {
+        let _filteredArray = filteredArray;
+        // Apply the rolling period on the filtered data
+        if (rollingPeriod > 1) {
+          _filteredArray = getRollingReturns(filteredArray, rollingPeriod);
+        }
         filtered.set(schemeCode, {
           ...fundData.value.get(schemeCode)!,
-          nav: filteredArray,
+          nav: _filteredArray,
         });
       }
     }
 
-    numberDataPoints.value = Math.min(...Array.from(filtered.values()).map(({ nav }) => nav.length));
+    numberDataPoints.value = Math.min(
+      ...Array.from(filtered.values()).map(({ nav }) => nav.length),
+    );
     return filtered;
   });
 
@@ -131,6 +191,7 @@ export const useDataStore = defineStore("data", () => {
     MAX_FUNDS,
     // Properties
     fundData,
+    chartType,
     filteredFundData,
     selectedFunds,
     selectedPeriod,
