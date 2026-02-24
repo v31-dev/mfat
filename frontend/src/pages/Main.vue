@@ -33,39 +33,6 @@ const changePeriodCalendar = ref<any>({
   clicked: null as "start" | "end" | null,
 });
 
-const _CHART_TYPES = [
-  {
-    days: undefined,
-    value: "absolute",
-    label: "Absolute Returns",
-  },
-  {
-    days: 30,
-    value: "rolling-30",
-    label: "Rolling Returns (30D)",
-  },
-  {
-    days: 90,
-    value: "rolling-90",
-    label: "Rolling Returns (3M)",
-  },
-  {
-    days: 180,
-    value: "rolling-180",
-    label: "Rolling Returns (6M)",
-  },
-  {
-    days: 365,
-    value: "rolling-365",
-    label: "Rolling Returns (1Y)",
-  },
-  {
-    days: 1095,
-    value: "rolling-1095",
-    label: "Rolling Returns (3Y)",
-  }
-];
-
 // Parse CSV schemeCode from router
 const parseSchemeCodesFromRoute = (max = dataStore.MAX_FUNDS): number[] => {
   try {
@@ -180,10 +147,8 @@ watch(changePeriodPopoverOpen, (val) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <template v-for="{ value, label, days } in _CHART_TYPES" :key="value">
-                  <SelectItem
-                    v-if="value === 'absolute' || (value.startsWith('rolling') && days !== undefined && !isNaN(days) && days < dataStore.numberDataPoints)"
-                    :value="value">
+                <template v-for="{ value, label } in dataStore.allowedChartTypes" :key="value">
+                  <SelectItem :value="value">
                     {{ label }}
                   </SelectItem>
                 </template>
@@ -215,7 +180,8 @@ watch(changePeriodPopoverOpen, (val) => {
         </CardHeader>
         <CardContent class="px-2 sm:px-4 py-2 sm:py-0">
           <ChartViewer :data="dataStore.filteredFundData" :funds="dataStore.selectedFunds"
-            :period="dataStore.selectedPeriod" :percentage="dataStore.chartType.startsWith('rolling-')" :loading="dataStore.isLoading" />
+            :period="dataStore.selectedPeriod" :percentage="dataStore.chartType.startsWith('rolling-')"
+            :loading="dataStore.isLoading" />
         </CardContent>
         <CardContent v-if="dataStore.selectedFunds.length > 0"
           class="flex w-full px-2 sm:px-4 sm:w-auto justify-between sm:justify-end">
