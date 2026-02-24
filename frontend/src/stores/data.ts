@@ -125,7 +125,7 @@ export const useDataStore = defineStore("data", () => {
     let rollingPeriod = 1;
     if (chartType.value.startsWith("rolling-")) {
       const days = parseInt(chartType.value.split("-")[1] ?? "");
-      if (isNaN(days) || days >= numberFilteredDataPoints.value - 10) {
+      if (isNaN(days) || days >= (numberFilteredDataPoints.value - 10)) {
         chartType.value = "absolute";
         toast.error(
           "Invalid chart type selected for the current data range. Resetting to absolute returns.",
