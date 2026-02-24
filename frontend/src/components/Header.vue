@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Icon } from "@iconify/vue";
 import { Button } from "@/components/ui/button";
-
 import { useColorMode } from "@vueuse/core";
+
 const mode = useColorMode();
 </script>
 

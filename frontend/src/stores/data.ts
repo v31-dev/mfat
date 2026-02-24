@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import type { Fund, FundData } from "@/lib/types";
 import { Period, type NavData, CHART_TYPES } from "@/lib/types";
 import { getNavHistory, getFundDetails } from "@/lib/api";
+import { toast } from "vue-sonner";
 
 // Calculates rolling returns for an array of numbers, omitting initial nulls.
 function getRollingReturns(data: NavData[], period: number): NavData[] {
@@ -25,7 +26,7 @@ function getRollingReturns(data: NavData[], period: number): NavData[] {
     } else {
       // if the rolling period is more than 1 yr then return cagr
       let nav;
-      if (period >= 365) { 
+      if (period >= 365) {
         nav = (Math.pow(currentValue / pastValue, 365 / period) - 1) * 100;
       } else {
         nav = ((currentValue - pastValue) / pastValue) * 100;
@@ -126,7 +127,7 @@ export const useDataStore = defineStore("data", () => {
       const days = parseInt(chartType.value.split("-")[1] ?? "");
       if (isNaN(days) || days >= numberFilteredDataPoints.value - 10) {
         chartType.value = "absolute";
-        console.error(
+        toast.error(
           "Invalid chart type selected for the current data range. Resetting to absolute returns.",
         );
       } else {
@@ -172,8 +173,10 @@ export const useDataStore = defineStore("data", () => {
       const navData = await getNavHistory(schemeCode);
       const fundDetails = await getFundDetails(schemeCode);
       isLoading.value = false;
-      if (fundDetails && navData) {
+      if (fundDetails && navData && navData.length > 0) {
         fundData.value.set(schemeCode, { fund: fundDetails, nav: navData });
+      } else {
+        toast.error("Failed to fetch fund data. Please try again.");
       }
     }
   }

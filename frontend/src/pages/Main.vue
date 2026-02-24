@@ -21,7 +21,11 @@ import ButtonGroup from "@/components/ui/button-group/ButtonGroup.vue";
 import { dateToString, calendarDateToDate, changeDateByDays } from "@/lib/utils";
 import PopoverAnchor from "@/components/ui/popover/PopoverAnchor.vue";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Toaster } from "vue-sonner";
+import { useColorMode } from "@vueuse/core";
 
+
+const mode = useColorMode();
 const route = useRoute();
 const router = useRouter();
 const dataStore = useDataStore();
@@ -202,5 +206,6 @@ watch(changePeriodPopoverOpen, (val) => {
         </CardContent>
       </Card>
     </main>
+    <Toaster position="top-center" :theme="mode as 'light' | 'dark'" />
   </div>
 </template>
