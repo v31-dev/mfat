@@ -139,7 +139,7 @@ watch(changePeriodPopoverOpen, (val) => {
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto sm:px-2 sm:py-4">
       <!-- Chart Section -->
-      <Card class="py-2 py-4 sm:py-4">
+      <Card class="sm:gap-4 py-4">
         <CardHeader class="px-4 sm:px-4 flex items-center justify-between">
           <CardTitle class="truncate">
             <Select v-model="dataStore.chartType">
@@ -178,7 +178,7 @@ watch(changePeriodPopoverOpen, (val) => {
             </Popover>
           </CardAction>
         </CardHeader>
-        <CardContent class="px-0 sm:px-4 py-0 sm:py-0">
+        <CardContent class="px-0 sm:px-0 py-0">
           <ChartViewer :data="dataStore.filteredFundData" :funds="dataStore.selectedFunds"
             :period="dataStore.selectedPeriod" :percentage="dataStore.chartType.startsWith('rolling-')"
             :loading="dataStore.isLoading" />
