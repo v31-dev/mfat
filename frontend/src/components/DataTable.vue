@@ -203,13 +203,13 @@ const onSelectFund = (fund: Fund) => {
                 <span
                   :class="
                     getReturnClass(
-                      getReturn(fund.schemeCode, Period.getFromSymbol(symbol)),
+                      getReturn(fund.schemeCode, Period.getFromSymbol(symbol, dataStore.allowedPeriod.end)),
                     )
                   "
                 >
                   {{
                     formatReturn(
-                      getReturn(fund.schemeCode, Period.getFromSymbol(symbol)),
+                      getReturn(fund.schemeCode, Period.getFromSymbol(symbol, dataStore.allowedPeriod.end)),
                     )
                   }}
                 </span>
@@ -275,13 +275,13 @@ const onSelectFund = (fund: Fund) => {
               <span
                 :class="
                   getReturnClass(
-                    getReturn(fund.schemeCode, Period.getFromSymbol(symbol)),
+                    getReturn(fund.schemeCode, Period.getFromSymbol(symbol, dataStore.allowedPeriod.end)),
                   )
                 "
               >
                 {{
                   formatReturn(
-                    getReturn(fund.schemeCode, Period.getFromSymbol(symbol)),
+                    getReturn(fund.schemeCode, Period.getFromSymbol(symbol, dataStore.allowedPeriod.end)),
                   )
                 }}
               </span>

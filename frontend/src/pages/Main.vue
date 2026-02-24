@@ -108,7 +108,7 @@ watch(changePeriodPopoverOpen, (val) => {
 // Period symbol buttons
 const activePeriodSymbol = computed(() => {
   return Period._SYMBOLS.find(symbol =>
-    dataStore.selectedPeriod.equals(Period.getFromSymbol(symbol))
+    dataStore.selectedPeriod.equals(Period.getFromSymbol(symbol, dataStore.allowedPeriod.end))
   );
 });
 </script>
@@ -170,7 +170,7 @@ const activePeriodSymbol = computed(() => {
           <ButtonGroup class="w-full sm:w-auto flex">
             <Button v-for="symbol in Period._SYMBOLS" :key="symbol" class="flex-1 sm:flex-none"
               :variant="activePeriodSymbol === symbol ? 'default' : 'outline'"
-              :disabled="!dataStore.allowedPeriod.startsBefore(Period.getFromSymbol(symbol))"
+              :disabled="!dataStore.allowedPeriod.startsBefore(Period.getFromSymbol(symbol, dataStore.allowedPeriod.end))"
               @click="dataStore.changePeriodBySymbol(symbol)">
               {{ symbol }}
             </Button>

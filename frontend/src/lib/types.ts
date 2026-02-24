@@ -36,34 +36,33 @@ export class Period {
     return new Period(calendarDateToDate(start), calendarDateToDate(end));
   }
 
-  static getFromSymbol(symbol: string): Period {
-    const end = new Date();
+  static getFromSymbol(symbol: string, endDate: Date): Period {
     let start: Date;
     switch (symbol) {
       case "1M":
-        start = new Date(end);
+        start = new Date(endDate);
         start.setMonth(start.getMonth() - 1);
-        return new Period(start, end);
+        return new Period(start, endDate);
       case "3M":
-        start = new Date(end);
+        start = new Date(endDate);
         start.setMonth(start.getMonth() - 3);
-        return new Period(start, end);
+        return new Period(start, endDate);
       case "6M":
-        start = new Date(end);
+        start = new Date(endDate);
         start.setMonth(start.getMonth() - 6);
-        return new Period(start, end);
+        return new Period(start, endDate);
       case "1Y":
-        start = new Date(end);
+        start = new Date(endDate);
         start.setFullYear(start.getFullYear() - 1);
-        return new Period(start, end);
+        return new Period(start, endDate);
       case "3Y":
-        start = new Date(end);
+        start = new Date(endDate);
         start.setFullYear(start.getFullYear() - 3);
-        return new Period(start, end);
+        return new Period(start, endDate);
       case "5Y":
-        start = new Date(end);
+        start = new Date(endDate);
         start.setFullYear(start.getFullYear() - 5);
-        return new Period(start, end);
+        return new Period(start, endDate);
       default:
         throw new Error(`Unknown period symbol: ${symbol}`);
     }
@@ -80,6 +79,10 @@ export class Period {
 
   startsBefore(other: Period): boolean {
     return this.start < other.start;
+  }
+
+  endsAfter(other: Period): boolean {
+    return this.end > other.end;
   }
 
   // Reutrn duration in days

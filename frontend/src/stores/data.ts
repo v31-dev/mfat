@@ -95,8 +95,13 @@ export const useDataStore = defineStore("data", () => {
 
     // If the currently selected period is outside the allowed range, reset it to the allowed range
     const _allowedPeriod = new Period(startDate, endDate);
+    
     if (selectedPeriod.value.startsBefore(_allowedPeriod)) {
-      selectedPeriod.value = _allowedPeriod;
+      selectedPeriod.value.start = _allowedPeriod.start;
+    }
+
+    if (selectedPeriod.value.endsAfter(_allowedPeriod)) {
+      selectedPeriod.value.end = _allowedPeriod.end;
     }
 
     return _allowedPeriod;
@@ -199,7 +204,7 @@ export const useDataStore = defineStore("data", () => {
   }
 
   function changePeriodBySymbol(symbol: string) {
-    const p = Period.getFromSymbol(symbol);
+    const p = Period.getFromSymbol(symbol, allowedPeriod.value.end);
     if (p) {
       selectedPeriod.value = p;
     }
