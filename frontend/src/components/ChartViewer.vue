@@ -126,17 +126,15 @@ const chartData = computed<ChartDataPoint[]>(() => {
         <VisLine v-for="(fund, index) in props.funds" :key="fund.schemeCode" :x="(d: ChartDataPoint) => d.date"
           :y="(d: ChartDataPoint) => d[`${fund.schemeCode}_percentage`]" :color="Colors.get(index)"
           :curve-type="CurveType.Linear" />
-        <VisAxis type="x" :x="(d: ChartDataPoint) => d.date" :tick-line="false" :domain-line="false" :grid-line="false"
-          :num-ticks="4" :tick-format="(d: number) => {
-            const date = new Date(d);
-            return date.toLocaleDateString('en-IN', {
-              month: 'short',
-              year: 'numeric',
-            });
-          }
-            " />
-        <VisAxis type="y" :num-ticks="4" :tick-line="false" :domain-line="false" :label="'Change (%)'"
-          :tick-format="(d: number) => `${d.toFixed(0)}%`" />
+        <VisAxis type="x" :x="(d: ChartDataPoint) => d.date" :num-ticks="4" :tick-format="(d: number) => {
+          const date = new Date(d);
+          return date.toLocaleDateString('en-IN', {
+            month: 'short',
+            year: 'numeric',
+          });
+        }
+          " />
+        <VisAxis type="y" :num-ticks="4" :label="'Change (%)'" :tick-format="(d: number) => `${d.toFixed(0)}%`" />
         <ChartTooltip />
         <!-- Key is required to force re-render of tooltip on funds change -->
         <ChartCrosshair :key="JSON.stringify(chartConfig)" :template="componentToString(chartConfig, ChartTooltipContent, {
