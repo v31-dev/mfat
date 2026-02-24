@@ -242,18 +242,16 @@ const onSelectFund = (fund: Fund) => {
               <span class="break-words whitespace-normal">{{
                 fund.schemeName
               }}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                @click="dataStore.removeFund(fund.schemeCode)"
+                class="ml-auto"
+              >
+                <Icon icon="lucide:trash-2" class="h-4 w-4 text-red-600" />
+              </Button>
             </div>
           </CardTitle>
-          <CardAction>
-            <Button
-              variant="ghost"
-              size="icon"
-              @click="dataStore.removeFund(fund.schemeCode)"
-              class="h-8 w-8"
-            >
-              <Icon icon="lucide:trash-2" class="h-4 w-4 text-red-600" />
-            </Button>
-          </CardAction>
         </CardHeader>
         <CardContent class="px-2">
           <div class="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
