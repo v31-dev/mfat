@@ -163,11 +163,11 @@ watch(changePeriodPopoverOpen, (val) => {
             <Popover v-model:open="changePeriodPopoverOpen">
               <PopoverAnchor>
                 <ButtonGroup>
-                  <Button :variant="changePeriodCalendar.clicked === 'start' ? 'default' : 'outline'"
+                  <Button :variant="changePeriodCalendar.clicked === 'start' ? 'default' : 'outline'" class="px-3"
                     :disabled="changePeriodCalendar.clicked == 'end'" @click="onClickChangePeriodStartDate">{{
                       dateToString(dataStore.selectedPeriod.start)
                     }}</Button>
-                  <Button :variant="changePeriodCalendar.clicked === 'end' ? 'default' : 'outline'"
+                  <Button :variant="changePeriodCalendar.clicked === 'end' ? 'default' : 'outline'" class="px-3"
                     :disabled="changePeriodCalendar.clicked == 'start'" @click="onClickChangePeriodEndDate">{{
                       dateToString(dataStore.selectedPeriod.end)
                     }}</Button>
