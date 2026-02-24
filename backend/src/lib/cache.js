@@ -57,8 +57,6 @@ async function refreshFundCache() {
     includeScore: true,
     minMatchCharLength: 2,
   });
-  // Clear the NAV cache since data is updated daily
-  cache.nav = {};
 
   console.log(`[FUND CACHE] Cache refreshed with ${funds.length} funds`);
 }
@@ -73,8 +71,8 @@ async function initializeCache() {
     console.error("[FUND CACHE] Error initializing:", error.message);
   }
 
-  // Schedule cache refresh every 24 hours
-  cron.schedule("0 0 * * *", async () => {
+  // Schedule fund cache refresh every month since funds aren't updated frequently. NAV cache will be refreshed on demand when client requests for a scheme code that's not in cache
+  cron.schedule("0 0 1 * *", async () => {
     console.log("[FUND CACHE] Refresh triggered");
     try {
       await refreshFundCache();
@@ -82,6 +80,13 @@ async function initializeCache() {
     } catch (error) {
       console.error("[FUND CACHE] Error refreshing:", error.message);
     }
+  });
+
+  // Schedule NAV cache refresh daily except Sunday & Monday
+  cron.schedule("0 0 0 * * 2-6", async () => {
+    console.log("[NAV CACHE] Daily refresh triggered");
+    cache.nav = {};
+    console.log("[NAV CACHE] Daily refresh complete");
   });
 }
 
