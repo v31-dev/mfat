@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch, ref, nextTick } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { onMounted, watch, ref, computed, nextTick } from "vue";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header.vue";
 import ChartViewer from "@/components/ChartViewer.vue";
@@ -23,11 +22,13 @@ import PopoverAnchor from "@/components/ui/popover/PopoverAnchor.vue";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Toaster } from "vue-sonner";
 import { useColorMode } from "@vueuse/core";
+import { useRoute, useRouter } from "vue-router";
+import { parseRouteParams, setRouteParams } from "@/lib/url";
 
 
-const mode = useColorMode();
 const route = useRoute();
 const router = useRouter();
+const mode = useColorMode();
 const dataStore = useDataStore();
 const changePeriodPopoverOpen = ref(false);
 const changePeriodCalendarDate = ref<any>();
@@ -37,64 +38,34 @@ const changePeriodCalendar = ref<any>({
   clicked: null as "start" | "end" | null,
 });
 
-// Parse CSV schemeCode from router
-const parseSchemeCodesFromRoute = (max = dataStore.MAX_FUNDS): number[] => {
-  try {
-    const schemeCodeParam = route.query.schemeCode;
-    if (!schemeCodeParam || typeof schemeCodeParam !== "string") return [];
-    return schemeCodeParam
-      .split(",")
-      .map((s) => s.trim())
-      .slice(0, max)
-      .map(Number)
-      .filter((n) => !isNaN(n));
-  } catch (e) {
-    return [];
-  }
-};
-
-// Write a single comma-separated `schemeCode` param to router
-const setSchemeCodesToRoute = (codes: number[]) => {
-  const q = { ...route.query };
-  const list = codes
-    .slice(0, dataStore.MAX_FUNDS)
-    .map((c) => String(c))
-    .join(",");
-  if (list.length > 0) {
-    q.schemeCode = list;
-  } else {
-    delete q.schemeCode;
-  }
-  router.replace({ query: q }).catch(() => { });
-};
-
-// Load funds from URL
-const loadFromCodes = async (codes: number[]) => {
-  if (!codes || codes.length === 0) return;
-  codes.forEach((code) => dataStore.addFund(code));
-  setSchemeCodesToRoute(dataStore.selectedFunds.map((f) => f.schemeCode));
-};
-
 // On mount, try to load from router query (if present)
 onMounted(async () => {
-  const codes = parseSchemeCodesFromRoute(5);
-  if (codes.length > 0) await loadFromCodes(codes);
+  const { schemeCode, selectedPeriod } = parseRouteParams(route);
+
+  if (schemeCode) {
+    await Promise.all(schemeCode.map((code) => dataStore.addFund(code)));
+  }
+
+  if (selectedPeriod) {
+    const [start, end] = selectedPeriod;
+    dataStore.changePeriod(Period.getFromDateString(start!, end!));
+    await nextTick();
+  }
 });
 
-// Keep URL in sync when selectedFunds changes
+// Keep URL in sync
 watch(
-  dataStore.fundData,
-  (fundData) => {
-    setSchemeCodesToRoute(
-      Array.from(fundData.values()).map(
-        (entry: { fund: { schemeCode: number } }) => entry.fund.schemeCode,
-      ),
-    );
+  [() => dataStore.selectedFunds, () => dataStore.selectedPeriod],
+  ([funds, period]) => {
+    setRouteParams(router, {
+      schemeCode: funds.map((f: any) => f.schemeCode),
+      selectedPeriod: [period.start.toISOString().slice(0, 10), period.end.toISOString().slice(0, 10)]
+    });
   },
-  { deep: true },
+  { deep: true }
 );
 
-// Handlers
+// Handlers for changing period via calendar popover
 const onChangePeriodCalendar = (value: any) => {
   if (changePeriodCalendar.value.clicked === "start") {
     dataStore.changePeriodStart(calendarDateToDate(value));
@@ -114,7 +85,6 @@ const onClickChangePeriodStartDate = async () => {
   changePeriodCalendar.value.start = dataStore.allowedPeriod.start;
   changePeriodCalendar.value.end = changeDateByDays(dataStore.selectedPeriod.end, - 1);
   changePeriodCalendar.value.clicked = "start";
-  await nextTick()
   changePeriodPopoverOpen.value = true;
 };
 
@@ -123,7 +93,6 @@ const onClickChangePeriodEndDate = async () => {
   changePeriodCalendar.value.start = changeDateByDays(dataStore.selectedPeriod.start, 1);
   changePeriodCalendar.value.end = dataStore.allowedPeriod.end;
   changePeriodCalendar.value.clicked = "end";
-  await nextTick()
   changePeriodPopoverOpen.value = true;
 };
 
@@ -132,6 +101,13 @@ watch(changePeriodPopoverOpen, (val) => {
   if (!val) {
     changePeriodCalendar.value.clicked = null;
   }
+});
+
+// Period symbol buttons
+const activePeriodSymbol = computed(() => {
+  return Period._SYMBOLS.find(symbol =>
+    dataStore.selectedPeriod.equals(Period.getFromSymbol(symbol))
+  );
 });
 </script>
 
@@ -190,13 +166,10 @@ watch(changePeriodPopoverOpen, (val) => {
         <CardContent v-if="dataStore.selectedFunds.length > 0"
           class="flex w-full px-4 sm:px-4 sm:w-auto justify-between sm:justify-end">
           <ButtonGroup class="w-full sm:w-auto flex">
-            <Button v-for="(symbol, _) in Period._SYMBOLS" :key="symbol" class="flex-1 sm:flex-none" :variant="dataStore.selectedPeriod.equals(Period.getFromSymbol(symbol))
-              ? 'default'
-              : 'outline'
-              " :disabled="!dataStore.allowedPeriod.startsBefore(
-                Period.getFromSymbol(symbol),
-              )
-                " @click="dataStore.changePeriodBySymbol(symbol)">
+            <Button v-for="symbol in Period._SYMBOLS" :key="symbol" class="flex-1 sm:flex-none"
+              :variant="activePeriodSymbol === symbol ? 'default' : 'outline'"
+              :disabled="!dataStore.allowedPeriod.startsBefore(Period.getFromSymbol(symbol))"
+              @click="dataStore.changePeriodBySymbol(symbol)">
               {{ symbol }}
             </Button>
           </ButtonGroup>

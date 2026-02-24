@@ -162,6 +162,7 @@ export const useDataStore = defineStore("data", () => {
       rollingPeriod +
       Math.min(...Array.from(filtered.values()).map(({ nav }) => nav.length));
 
+    console.debug("Fund data filtered.");
     return filtered;
   });
 

@@ -24,8 +24,12 @@ export class Period {
   public end: Date;
 
   constructor(start: Date, end: Date) {
-    this.start = start;
-    this.end = end;
+    this.start = new Date(start.toISOString().slice(0, 10));
+    this.end = new Date(end.toISOString().slice(0, 10));
+  }
+
+  static getFromDateString(start: string, end: string): Period {
+    return new Period(new Date(start), new Date(end));
   }
 
   static getFromCalendarDate(start: CalendarDate, end: CalendarDate): Period {
@@ -103,6 +107,10 @@ export interface ChartDataPoint {
   [key: string]: number | Date | string;
 }
 
+export interface RouteParams {
+  schemeCode: number[] | null;
+  selectedPeriod: string[] | null;
+}
 
 export const CHART_TYPES = [
   {
