@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch, ref, computed, nextTick } from "vue";
+import { onMounted, watch, ref, computed } from "vue";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header.vue";
 import ChartViewer from "@/components/ChartViewer.vue";
@@ -30,6 +30,7 @@ const route = useRoute();
 const router = useRouter();
 const mode = useColorMode();
 const dataStore = useDataStore();
+const initialLoading = ref(true);
 const changePeriodPopoverOpen = ref(false);
 const changePeriodCalendarDate = ref<any>();
 const changePeriodCalendar = ref<any>({
@@ -49,8 +50,9 @@ onMounted(async () => {
   if (selectedPeriod) {
     const [start, end] = selectedPeriod;
     dataStore.changePeriod(Period.getFromDateString(start!, end!));
-    await nextTick();
   }
+
+  initialLoading.value = false;
 });
 
 // Keep URL in sync
@@ -161,7 +163,7 @@ const activePeriodSymbol = computed(() => {
         <CardContent class="px-0 sm:px-0 py-0">
           <ChartViewer :data="dataStore.filteredFundData" :funds="dataStore.selectedFunds"
             :period="dataStore.selectedPeriod" :percentage="dataStore.chartType.startsWith('rolling-')"
-            :loading="dataStore.isLoading" />
+            :loading="initialLoading || dataStore.isLoading" />
         </CardContent>
         <CardContent v-if="dataStore.selectedFunds.length > 0"
           class="flex w-full px-4 sm:px-4 sm:w-auto justify-between sm:justify-end">
@@ -175,7 +177,7 @@ const activePeriodSymbol = computed(() => {
           </ButtonGroup>
         </CardContent>
         <CardContent class="px-4 sm:px-4 py-0">
-          <DataTable />
+          <DataTable :loading="initialLoading || dataStore.isLoading" />
         </CardContent>
       </Card>
     </main>

@@ -24,6 +24,12 @@ import { useDataStore } from "@/stores/data";
 
 const dataStore = useDataStore();
 
+interface Props {
+  loading: boolean;
+}
+
+const props = defineProps<Props>();
+
 // State
 const searchQuery = ref("");
 const searchedFunds = ref<Fund[]>([]);
@@ -124,7 +130,7 @@ const onSelectFund = (fund: Fund) => {
           v-model="searchQuery"
           @input="onSearch"
           :placeholder="searchPlaceholder"
-          :disabled="isFundLimitReached || dataStore.isLoading"
+          :disabled="props.loading || isFundLimitReached || dataStore.isLoading"
         />
         <Transition name="fade">
           <div
