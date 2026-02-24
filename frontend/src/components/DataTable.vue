@@ -71,11 +71,14 @@ const getReturn = (schemeCode: number, period: Period): number | string => {
 
   if (!startNavEntry || !endNavEntry) return "--";
 
-  return parseFloat(
-    (((endNavEntry.nav - startNavEntry.nav) / startNavEntry.nav) * 100).toFixed(
-      0,
-    ),
-  );
+  // For periods >= 1 year, show the CAGR
+  let nav;
+  if (period.duration() >= 365) {
+    nav = (Math.pow(endNavEntry.nav / startNavEntry.nav, 365 / period.duration()) - 1) * 100;
+  } else {
+    nav = ((endNavEntry.nav - startNavEntry.nav) / startNavEntry.nav) * 100;
+  }
+  return parseFloat(nav.toFixed(1));
 };
 
 // Return a Tailwind text color class based on value sign
@@ -147,13 +150,13 @@ const onSelectFund = (fund: Fund) => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-72">Fund Name</TableHead>
-            <TableHead class="w-28 text-right px-2">NAV ₹</TableHead>
+            <TableHead class="w-28 text-right px-2">NAV</TableHead>
             <TableHead
               v-for="symbol in Period._SYMBOLS"
               :key="symbol"
               class="w-16 text-right px-2"
             >
-              {{ symbol }} (%)
+              {{ symbol }}
             </TableHead>
             <TableHead class="w-12 text-right px-2"></TableHead>
           </TableRow>
@@ -185,7 +188,7 @@ const onSelectFund = (fund: Fund) => {
                 </div>
               </TableCell>
               <TableCell class="w-28 text-right py-1 px-2">
-                {{ getLastNav(fund.schemeCode) }}
+                ₹{{ getLastNav(fund.schemeCode) }}
               </TableCell>
               <TableCell
                 v-for="symbol in Period._SYMBOLS"
@@ -255,8 +258,8 @@ const onSelectFund = (fund: Fund) => {
         <CardContent class="px-2">
           <div class="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
             <div class="flex justify-between">
-              <span class="text-muted-foreground">NAV ₹</span>
-              <span>{{ getLastNav(fund.schemeCode) }}</span>
+              <span class="text-muted-foreground">NAV</span>
+              <span>₹{{ getLastNav(fund.schemeCode) }}</span>
             </div>
             <div />
             <div />
@@ -265,7 +268,7 @@ const onSelectFund = (fund: Fund) => {
               :key="symbol"
               class="flex justify-between"
             >
-              <span class="text-muted-foreground">{{ symbol }} (%)</span>
+              <span class="text-muted-foreground">{{ symbol }}</span>
               <span
                 :class="
                   getReturnClass(

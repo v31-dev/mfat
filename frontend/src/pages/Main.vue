@@ -137,10 +137,10 @@ watch(changePeriodPopoverOpen, (val) => {
     <Header />
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto sm:px-2 sm:py-2 sm:py-4">
+    <main class="max-w-7xl mx-auto sm:px-2 sm:py-4">
       <!-- Chart Section -->
-      <Card class="py-2 py-4 sm:py-6">
-        <CardHeader class="px-4 sm:px-6 flex items-center justify-between">
+      <Card class="py-2 py-4 sm:py-4">
+        <CardHeader class="px-4 sm:px-4 flex items-center justify-between">
           <CardTitle class="truncate">
             <Select v-model="dataStore.chartType">
               <SelectTrigger>
@@ -178,13 +178,13 @@ watch(changePeriodPopoverOpen, (val) => {
             </Popover>
           </CardAction>
         </CardHeader>
-        <CardContent class="px-2 sm:px-4 py-2 sm:py-0">
+        <CardContent class="px-0 sm:px-4 py-0 sm:py-0">
           <ChartViewer :data="dataStore.filteredFundData" :funds="dataStore.selectedFunds"
             :period="dataStore.selectedPeriod" :percentage="dataStore.chartType.startsWith('rolling-')"
             :loading="dataStore.isLoading" />
         </CardContent>
         <CardContent v-if="dataStore.selectedFunds.length > 0"
-          class="flex w-full px-2 sm:px-4 sm:w-auto justify-between sm:justify-end">
+          class="flex w-full px-4 sm:px-4 sm:w-auto justify-between sm:justify-end">
           <ButtonGroup class="w-full sm:w-auto flex">
             <Button v-for="(symbol, _) in Period._SYMBOLS" :key="symbol" class="flex-1 sm:flex-none" :variant="dataStore.selectedPeriod.equals(Period.getFromSymbol(symbol))
               ? 'default'
@@ -197,7 +197,7 @@ watch(changePeriodPopoverOpen, (val) => {
             </Button>
           </ButtonGroup>
         </CardContent>
-        <CardContent class="px-2 sm:px-4 py-0">
+        <CardContent class="px-4 sm:px-4 py-0">
           <DataTable />
         </CardContent>
       </Card>

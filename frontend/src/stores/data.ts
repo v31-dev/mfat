@@ -6,13 +6,7 @@ import { getNavHistory, getFundDetails } from "@/lib/api";
 
 // Calculates rolling returns for an array of numbers, omitting initial nulls.
 function getRollingReturns(data: NavData[], period: number): NavData[] {
-  // If the period is invalid or larger than our data, return an empty array
-  if (period <= 0 || period >= data.length) {
-    return [];
-  }
-
   const returns: NavData[] = [];
-
   // Start the loop exactly at the 'period' index to skip the unavailable lookback window
   for (let i = period; i < data.length; i++) {
     const currentValue = data[i]?.nav;
@@ -28,11 +22,17 @@ function getRollingReturns(data: NavData[], period: number): NavData[] {
       console.error(
         `Invalid data at index ${i}: currentValue=${currentValue}, pastValue=${pastValue}. Returning 0 for this point.`,
       );
-
     } else {
+      // if the rolling period is more than 1 yr then return cagr
+      let nav;
+      if (period >= 365) { 
+        nav = (Math.pow(currentValue / pastValue, 365 / period) - 1) * 100;
+      } else {
+        nav = ((currentValue - pastValue) / pastValue) * 100;
+      }
       returns.push({
         date: data[i]!.date,
-        nav: 100 * (currentValue - pastValue) / pastValue,
+        nav: nav,
       });
     }
   }
@@ -51,7 +51,7 @@ export const useDataStore = defineStore("data", () => {
   // Funds added by user and their NAV data
   // This is the source of truth data
   const fundData = ref<Map<number, FundData>>(new Map());
-  
+
   // Period selected by user
   const selectedPeriod = ref<Period>(
     new Period(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000), new Date()),
@@ -105,12 +105,11 @@ export const useDataStore = defineStore("data", () => {
 
   // Chart type allowed based on allowed period and fund data
   const allowedChartTypes = computed<any>(() => {
-    return CHART_TYPES.filter(type => {
-      if (type.days == 0)
-        return true
+    return CHART_TYPES.filter((type) => {
+      if (type.days == 0) return true;
       else {
         // Put a tolerance at least minimum data points
-        return type.days < (numberFilteredDataPoints.value - 10)
+        return type.days < numberFilteredDataPoints.value - 10;
       }
     });
   });
@@ -119,13 +118,13 @@ export const useDataStore = defineStore("data", () => {
   // So we filter the date before sending it to the chart components
   const filteredFundData = computed<Map<number, FundData>>(() => {
     const filtered = new Map<number, FundData>();
-    
+
     // Validate the chart type
     // If it is a rolling period but the user has selected a period shorter than the rolling period, reset to absolute returns
     let rollingPeriod = 1;
     if (chartType.value.startsWith("rolling-")) {
       const days = parseInt(chartType.value.split("-")[1] ?? "");
-      if (isNaN(days) || days >= (numberFilteredDataPoints.value - 10)) {
+      if (isNaN(days) || days >= numberFilteredDataPoints.value - 10) {
         chartType.value = "absolute";
         console.error(
           "Invalid chart type selected for the current data range. Resetting to absolute returns.",
@@ -158,9 +157,9 @@ export const useDataStore = defineStore("data", () => {
     }
 
     // Count of total data points
-    numberFilteredDataPoints.value = rollingPeriod + Math.min(
-      ...Array.from(filtered.values()).map(({ nav }) => nav.length),
-    );
+    numberFilteredDataPoints.value =
+      rollingPeriod +
+      Math.min(...Array.from(filtered.values()).map(({ nav }) => nav.length));
 
     return filtered;
   });

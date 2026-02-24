@@ -134,5 +134,10 @@ export const CHART_TYPES = [
     days: 1095,
     value: "rolling-1095",
     label: "Rolling Returns (3Y)",
+  },
+  {
+    days: 1825,
+    value: "rolling-1825",
+    label: "Rolling Returns (5Y)",
   }
 ];
