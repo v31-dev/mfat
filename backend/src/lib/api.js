@@ -1,6 +1,21 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
 import axios from "axios";
 
 const API_URL = "https://api.mfapi.in/mf";
+
+// Load NAV corrections from a local file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const NAV_CORRECTIONS = fs.readFileSync(path.resolve(__dirname, "nav_corrections.csv"), "utf-8").split("\n").reduce((acc, line) => {
+  const [schemeCode, date, multiplier] = line.split(",");
+  if (schemeCode && date && multiplier) {
+    acc[schemeCode] = { date: new Date(date), multiplier: isNaN(multiplier) ? 1 : parseFloat(multiplier) };
+  }
+  return acc;
+}, {});
 
 // Since we're filtering only Direct Growth Plans
 // Clean the scheme name as they get quite long
@@ -83,6 +98,20 @@ async function fetchNAVHistory(schemeCode) {
     });
 
     currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  // There are some funds whose data needs to be corrected because of splits
+  if (NAV_CORRECTIONS[schemeCode]) {
+    const { date: correctionDate, multiplier } = NAV_CORRECTIONS[schemeCode];
+    console.log(`[NAV CACHE] Applying NAV correction for schemeCode ${schemeCode} from date ${correctionDate.toISOString().split("T")[0]} with multiplier ${multiplier}`);
+    for (let i = 0; i < filledData.length; i++) {
+      const entryDate = new Date(filledData[i].date);
+      if (entryDate >= correctionDate) {
+        filledData[i].nav = filledData[i].nav
+          ? (filledData[i].nav * multiplier).toFixed(2)
+          : null;
+      }
+    }
   }
 
   return filledData; // [{ date, nav }, ...]
