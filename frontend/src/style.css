@@ -118,3 +118,34 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Scrollbar styling */
+:root {
+  --scrollbar-thumb: var(--border); /* Tailwind gray-300 */
+  --scrollbar-track: transparent;
+}
+
+.dark {
+  --scrollbar-thumb: var(--border); /* Tailwind gray-700 */
+  --scrollbar-track: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+/* Scrollbar styling */
