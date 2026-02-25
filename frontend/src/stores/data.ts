@@ -107,7 +107,25 @@ export const useDataStore = defineStore("data", () => {
     return _allowedPeriod;
   });
 
-  const numberFilteredDataPoints = ref(0);
+  // Data points available after filtering on selected period
+  const numberFilteredDataPoints = computed<number>(() => {
+    const filteredArrays: number[] = [];
+    for (const [_, { nav: fundNavs }] of fundData.value) {
+      const filteredArray = fundNavs.filter((d) => {
+        const date = new Date(d.date);
+        return (
+          date >= selectedPeriod.value.start && date <= selectedPeriod.value.end
+        );
+      });
+      filteredArrays.push(filteredArray.length);
+    }
+
+    // If there are no funds, return 0
+    if (filteredArrays.length === 0) return 0;
+
+    // Return the minimum length among all filtered arrays
+    return Math.min(...filteredArrays);
+  });
 
   // Chart type allowed based on allowed period and fund data
   const allowedChartTypes = computed<any>(() => {
@@ -161,11 +179,6 @@ export const useDataStore = defineStore("data", () => {
         });
       }
     }
-
-    // Count of total data points
-    numberFilteredDataPoints.value =
-      rollingPeriod +
-      Math.min(...Array.from(filtered.values()).map(({ nav }) => nav.length));
 
     console.debug("Fund data filtered.");
     return filtered;
