@@ -37,13 +37,12 @@ async function fetchAllFunds() {
   }
 
   // Only fetch Direct Growth funds and relevant fields
+  const disallowedKeywords = ["regular", "idcw", "income distribution", "capital withdrawal"];
   return response.data
     .filter(
       (fund) =>
         fund.isinGrowth != null &&
-        !fund.schemeName.toLowerCase().includes("regular") &&
-        !fund.schemeName.toLowerCase().includes("idcw") &&
-        !fund.schemeName.toLowerCase().includes("income distribution"),
+        !disallowedKeywords.some((keyword) => fund.schemeName.toLowerCase().includes(keyword))
     )
     .map(({ schemeCode, schemeName, isinGrowth }) => ({
       schemeCode,
