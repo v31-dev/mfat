@@ -114,12 +114,12 @@ const activePeriodSymbol = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-background">
+  <div class="min-h-screen flex flex-col bg-background">
     <!-- Header -->
     <Header />
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto sm:px-2 sm:py-4">
+    <main class="flex-1 w-full max-w-7xl mx-auto sm:px-2 sm:py-4">
       <!-- Chart Section -->
       <Card class="sm:gap-4 py-4">
         <CardHeader class="px-4 sm:px-4 flex items-center justify-between">
@@ -181,6 +181,10 @@ const activePeriodSymbol = computed(() => {
         </CardContent>
       </Card>
     </main>
+    <!-- Footer -->
+    <footer class="w-full py-4 border-t border-border text-center text-muted-foreground text-sm">
+      Data sourced from <a href="https://www.mfapi.in/" target="_blank" class="underline">MFAPI</a>
+    </footer>
     <Toaster position="top-center" :theme="mode as 'light' | 'dark'" />
   </div>
 </template>

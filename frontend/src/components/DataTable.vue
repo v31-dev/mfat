@@ -118,6 +118,12 @@ const onSelectFund = (fund: Fund) => {
   searchQuery.value = "";
   searchedFunds.value = [];
 };
+
+const onBlurSearch = () => {
+  setTimeout(() => {
+    searchedFunds.value = [];
+  }, 150);
+};
 </script>
 
 <template>
@@ -128,6 +134,7 @@ const onSelectFund = (fund: Fund) => {
       <div class="relative w-full sm:w-64">
         <Input
           v-model="searchQuery"
+          @blur="onBlurSearch"
           @input="onSearch"
           :placeholder="searchPlaceholder"
           :disabled="props.loading || isFundLimitReached || dataStore.isLoading"
