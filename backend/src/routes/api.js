@@ -14,6 +14,14 @@ router.get("/search", (req, res) => {
 
   try {
     const results = cache.fuse.search(q).map((r) => r.item);
+
+    // Pre-cache NAV data for top search results
+    results.slice(0, 5).forEach((fund) => {
+      if (!cache.nav[fund.schemeCode]) {
+        refreshNAVCache(fund.schemeCode);
+      }
+    });
+
     res.json(results);
   } catch (error) {
     console.error("Search error:", error);
