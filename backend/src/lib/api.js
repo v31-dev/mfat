@@ -1,21 +1,6 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
 import axios from "axios";
 
 const API_URL = "https://api.mfapi.in/mf";
-
-// Load NAV corrections from a local file
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const NAV_CORRECTIONS = fs.readFileSync(path.resolve(__dirname, "nav_corrections.csv"), "utf-8").split("\n").reduce((acc, line) => {
-  const [schemeCode, date, multiplier] = line.split(",");
-  if (schemeCode && date && multiplier) {
-    acc[schemeCode] = { date: new Date(date), multiplier: isNaN(multiplier) ? 1 : parseFloat(multiplier) };
-  }
-  return acc;
-}, {});
 
 // Since we're filtering only Direct Growth Plans
 // Clean the scheme name as they get quite long
@@ -94,24 +79,28 @@ async function fetchNAVHistory(schemeCode) {
 
     filledData.push({
       date: dateStr,
-      nav: lastNAV ? parseFloat(lastNAV).toFixed(2) : null,
+      nav: lastNAV ? lastNAV : null,
     });
 
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
   // There are some funds whose data needs to be corrected because of splits
-  if (NAV_CORRECTIONS[schemeCode]) {
-    const { date: correctionDate, multiplier } = NAV_CORRECTIONS[schemeCode];
-    console.log(`[NAV CACHE] Applying NAV correction for schemeCode ${schemeCode} from date ${correctionDate.toISOString().split("T")[0]} with multiplier ${multiplier}`);
-    for (let i = 0; i < filledData.length; i++) {
-      const entryDate = new Date(filledData[i].date);
-      if (entryDate >= correctionDate) {
-        filledData[i].nav = filledData[i].nav
-          ? (filledData[i].nav * multiplier).toFixed(2)
-          : null;
-      }
+  let navCorrectionApplied = 0;
+  // Reverse walk to normalize pre-split values to post-split values 
+  for (let i = filledData.length - 2; i >= 0; i--) {
+    // If the NAV changed drastically then it's likely a 1:10 split happened
+    if (filledData[i].nav > filledData[i + 1].nav * 8) {
+      filledData[i].nav = parseFloat(filledData[i].nav / 10).toFixed(2);
+      navCorrectionApplied++;
+    } else {
+      // Convert to 2 decimal places for consistency
+      filledData[i].nav = parseFloat(filledData[i].nav).toFixed(2);
     }
+  }
+
+  if (navCorrectionApplied > 0) {
+    console.log(`[NAV CACHE] Applied NAV correction for schemeCode ${schemeCode} for ${navCorrectionApplied} entries`);
   }
 
   return filledData; // [{ date, nav }, ...]
