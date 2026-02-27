@@ -98,6 +98,7 @@ async function fetchNAVHistory(schemeCode) {
       filledData[i].nav = parseFloat(filledData[i].nav).toFixed(2);
     }
   }
+  filledData[filledData.length - 1].nav = parseFloat(filledData[filledData.length - 1].nav).toFixed(2);
 
   if (navCorrectionApplied > 0) {
     console.log(`[NAV CACHE] Applied NAV correction for schemeCode ${schemeCode} for ${navCorrectionApplied} entries`);
