@@ -189,15 +189,43 @@ export const useDataStore = defineStore("data", () => {
     if (fundData.value.size >= MAX_FUNDS) return;
     if (!fundData.value.has(schemeCode)) {
       isLoading.value = true;
+
       const navData = await getNavHistory(schemeCode);
       const fundDetails = await getFundDetails(schemeCode);
+
       isLoading.value = false;
+      
       if (fundDetails && navData && navData.length > 0) {
         fundData.value.set(schemeCode, { fund: fundDetails, nav: navData });
       } else {
         toast.error("Failed to fetch fund data. Please try again.");
       }
     }
+  }
+
+  async function addFunds(schemeCodes: number[]) {
+    let validSchemeCodes = schemeCodes.filter((code) => !fundData.value.has(code));
+
+    if (fundData.value.size + validSchemeCodes.length >= MAX_FUNDS) {
+      validSchemeCodes = validSchemeCodes.slice(0, MAX_FUNDS - fundData.value.size);
+    };
+
+    isLoading.value = true;
+    
+    const navDataArray = await Promise.all(validSchemeCodes.map((code) => getNavHistory(code)));
+    const fundDetailsArray = await Promise.all(validSchemeCodes.map((code) => getFundDetails(code)));
+    
+    validSchemeCodes.forEach((code, index) => {
+      const navData = navDataArray[index];
+      const fundDetails = fundDetailsArray[index];
+      if (fundDetails && navData && navData.length > 0) {
+        fundData.value.set(code, { fund: fundDetails, nav: navData });
+      } else {
+        toast.error(`Failed to fetch data for fund scheme code ${code}. Please try again.`);
+      }
+    });
+
+    isLoading.value = false;
   }
 
   function removeFund(schemeCode: number) {
@@ -237,6 +265,7 @@ export const useDataStore = defineStore("data", () => {
     allowedChartTypes,
     // Actions
     addFund,
+    addFunds,
     removeFund,
     changePeriod,
     changePeriodStart,
