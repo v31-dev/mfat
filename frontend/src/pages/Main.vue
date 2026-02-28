@@ -44,7 +44,7 @@ onMounted(async () => {
   const { schemeCode, selectedPeriod } = parseRouteParams(route);
 
   if (schemeCode) {
-    await Promise.all(schemeCode.map((code) => dataStore.addFund(code)));
+    await dataStore.addFunds(schemeCode);
   }
 
   if (selectedPeriod) {
