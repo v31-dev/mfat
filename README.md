@@ -4,6 +4,8 @@ A web application for exploring and analysing mutual fund performance with flexi
 
 Data is sourced using https://mfapi.in.
 
+![](docs/showcase.png)
+
 ## Architecture
 
 ### Docker Compose Services:
